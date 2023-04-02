@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller
 {
@@ -14,8 +15,23 @@ class ProductController extends Controller
      */
     public function index()
     {
-        return view('shop');
+        //gets the id of the authenticated user
+        $user = Auth::user();
+        $admin = false;
+        // get all the products
+        $products = Product::all();
+        // if there is an authenticated user, check if admin
+        // if yes, get only the products with his id
+        if ($user != null) {
+            if ($user->isAdmin) {
+                $admin = true;
+                $products = Product::where('user_id', '=', $user->id)->get();
+            }
+        }
+        //pass the data to the view
+        return view('shop', ['products' => $products, 'admin' => $admin]);
     }
+
 
     /**
      * Show the form for creating a new resource.
